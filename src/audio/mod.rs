@@ -61,6 +61,9 @@
 use bevy::prelude::*;
 use bevy_seedling::prelude::*;
 
+pub mod fdsp_host;
+pub mod radio;
+
 /// Utility for converting a simple `[0.0, 1.0]` range to [`Volume`].
 ///
 ///# Example
