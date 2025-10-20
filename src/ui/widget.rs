@@ -1,64 +1,6 @@
-//! Most of this module is copied from feathers crate as is, as encouraged
 use super::*;
-use bevy::{
-    app::{PluginGroup, PluginGroupBuilder},
-    asset::embedded_asset,
-    ecs::{spawn::SpawnWith, system::IntoObserverSystem},
-    input_focus::{InputDispatchPlugin, tab_navigation::TabNavigationPlugin},
-    ui_widgets::UiWidgetsPlugins,
-    window::Window,
-};
+use bevy::ecs::system::IntoObserverSystem;
 use std::borrow::Cow;
-
-pub mod alpha_pattern;
-pub mod constants;
-pub mod controls;
-pub mod cursor;
-pub mod font_styles;
-pub mod handle_or_path;
-pub mod palette;
-pub mod props;
-pub mod rounded_corners;
-pub mod theme;
-pub mod tokens;
-
-use crate::ui::widgets::{
-    alpha_pattern::{AlphaPattern, AlphaPatternMaterial, AlphaPatternResource},
-    constants::{fonts, size},
-    cursor::{DefaultCursor, EntityCursor},
-    font_styles::InheritableFont,
-    handle_or_path::HandleOrPath,
-    rounded_corners::RoundedCorners,
-    theme::{ThemeBackgroundColor, ThemeBorderColor, ThemeFontColor, ThemedText, UiTheme},
-};
-pub use {palette::*, props::*};
-
-pub struct UiWidgets;
-
-impl PluginGroup for UiWidgets {
-    fn build(self) -> PluginGroupBuilder {
-        PluginGroupBuilder::start::<Self>()
-            .add_group(UiWidgetsPlugins)
-            .add(InputDispatchPlugin)
-            .add(TabNavigationPlugin)
-            .add(plugin)
-    }
-}
-
-pub fn plugin(app: &mut App) {
-    app.init_resource::<UiTheme>();
-
-    // Embedded font
-    embedded_asset!(app, "../../../assets/fonts/FiraCode-Bold.ttf");
-    embedded_asset!(app, "../../../assets/fonts/FiraCode-Medium.ttf");
-    embedded_asset!(app, "../../../assets/fonts/FiraCode-Regular.ttf");
-    embedded_asset!(app, "../../../assets/fonts/JetBrainsMono-Italic.ttf");
-
-    // Embedded shader
-    embedded_asset!(app, "../../../assets/shaders/alpha_pattern.wgsl");
-
-    app.add_plugins(controls::plugin);
-}
 
 /// A root UI node that fills the window and centers its content.
 pub fn ui_root(name: impl Into<Cow<'static, str>>) -> impl Bundle {
@@ -164,7 +106,7 @@ where
         Name::new("Button"),
         Node::default(),
         Children::spawn(SpawnWith(move |parent: &mut ChildSpawner| {
-            let content = match &opts.inner {
+            let content = match &opts.content {
                 WidgetContent::Image(_) => parent.spawn(opts.clone().into_image_bundle()).id(),
                 WidgetContent::Text(_) => parent.spawn(opts.clone().into_text_bundle()).id(),
             };
@@ -173,7 +115,7 @@ where
                     Button,
                     opts.border_radius,
                     opts.border_color,
-                    // opts.ui_palette,
+                    opts.ui_palette,
                 ))
                 .insert(opts.node)
                 .add_children(&[content])

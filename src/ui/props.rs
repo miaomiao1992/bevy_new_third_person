@@ -1,12 +1,10 @@
 use super::*;
 use std::borrow::Cow;
 
-pub const BORDER_RADIUS: f32 = 15.0;
-pub const FONT_SIZE: f32 = 24.0;
-
 #[derive(Debug, Clone, Bundle)]
 pub struct Props {
-    pub inner: WidgetContent,
+    pub content: WidgetContent,
+    pub ui_palette: UiInteraction,
     // layout
     pub border_radius: BorderRadius,
     pub border_color: BorderColor,
@@ -18,8 +16,10 @@ pub struct Props {
 impl Props {
     pub fn new(c: impl Into<WidgetContent>) -> Self {
         Self {
-            inner: c.into(),
+            content: c.into(),
+            ui_palette: UiInteraction::DEFAULT,
             node: Node {
+                flex_direction: FlexDirection::Row,
                 align_items: AlignItems::Center,
                 align_content: AlignContent::Center,
                 justify_items: JustifyItems::Center,
@@ -28,39 +28,26 @@ impl Props {
                 padding: UiRect::horizontal(Vw(3.0)),
                 ..Default::default()
             },
-            bg_color: BackgroundColor(TRANSPARENT),
-            border_color: BorderColor::all(WHITEISH),
-            border_radius: RoundedCorners::All.to_border_radius(Px(BORDER_RADIUS)),
+            bg_color: BackgroundColor(colors::TRANSPARENT),
+            border_color: BorderColor::all(colors::WHITEISH),
+            border_radius: BorderRadius::all(size::BORDER_RADIUS),
         }
     }
 
-    pub fn image(mut self, s: Handle<Image>) -> Self {
-        self.inner = WidgetContent::Image(ImageNode::new(s));
-        self
-    }
-    pub fn text(mut self, text: impl Into<Cow<'static, str>>) -> Self {
-        match self.inner {
-            WidgetContent::Text(ref mut t) => {
-                t.text = Text(text.into().to_string());
-            }
-            _ => self.inner = WidgetContent::Text(text.into().into()),
-        }
-        self
-    }
     pub fn font(mut self, font: TextFont) -> Self {
-        if let WidgetContent::Text(ref mut t) = self.inner {
+        if let WidgetContent::Text(ref mut t) = self.content {
             t.font = font;
         }
         self
     }
     pub fn font_size(mut self, s: f32) -> Self {
-        if let WidgetContent::Text(ref mut t) = self.inner {
+        if let WidgetContent::Text(ref mut t) = self.content {
             t.font.font_size = s;
         }
         self
     }
     pub fn color(mut self, c: Color) -> Self {
-        if let WidgetContent::Text(ref mut t) = self.inner {
+        if let WidgetContent::Text(ref mut t) = self.content {
             *t.color = c;
         }
         self
@@ -74,7 +61,7 @@ impl Props {
         self
     }
     pub fn border_radius(mut self, r: Val) -> Self {
-        self.border_radius = RoundedCorners::All.to_border_radius(r);
+        self.border_radius = BorderRadius::all(r);
         self
     }
     pub fn node(mut self, new: Node) -> Self {
@@ -109,11 +96,36 @@ impl Props {
         self.node.padding = p;
         self
     }
+    pub fn flex_direction(mut self, d: FlexDirection) -> Self {
+        self.node.flex_direction = d;
+        self
+    }
+    pub fn ui_palette(mut self, p: UiInteraction) -> Self {
+        self.ui_palette = p;
+        self
+    }
+
+    // Content related methods
+
+    pub fn image(mut self, s: Handle<Image>) -> Self {
+        self.content = WidgetContent::Image(ImageNode::new(s));
+        self
+    }
+    pub fn text(mut self, text: impl Into<Cow<'static, str>>) -> Self {
+        match self.content {
+            WidgetContent::Text(ref mut t) => {
+                t.text = Text(text.into().to_string());
+            }
+            _ => self.content = WidgetContent::Text(text.into().into()),
+        }
+        self
+    }
     // TODO: do a mesh2d ui bundle
     pub fn into_image_bundle(self) -> impl Bundle {
-        match &self.inner {
+        match &self.content {
             WidgetContent::Image(c) => (
                 c.clone(),
+                self.bg_color,
                 Node {
                     position_type: PositionType::Absolute,
                     width: Percent(100.0),
@@ -127,7 +139,7 @@ impl Props {
         }
     }
     pub fn into_text_bundle(self) -> impl Bundle {
-        match &self.inner {
+        match &self.content {
             WidgetContent::Text(c) => (c.clone(), self.bg_color),
             _ => unreachable!("Spawning text bundle on non text content"),
         }
@@ -166,9 +178,9 @@ impl Default for TextContent {
     fn default() -> Self {
         Self {
             text: "".into(),
-            color: WHITEISH.into(),
+            color: colors::WHITEISH.into(),
             layout: TextLayout::new_with_justify(Justify::Center),
-            font: TextFont::from_font_size(FONT_SIZE),
+            font: TextFont::from_font_size(size::FONT_SIZE),
         }
     }
 }
