@@ -1,11 +1,11 @@
+use crate::*;
+use avian3d::prelude::*;
 use bevy::{
     anti_alias::{fxaa::Fxaa, taa::TemporalAntiAliasing},
     core_pipeline::prepass::DeferredPrepass,
     pbr::DefaultOpaqueRendererMethod,
     render::view::Hdr,
 };
-
-use super::*;
 
 #[cfg(feature = "third_person")]
 mod third_person;
