@@ -6,8 +6,7 @@ target/
 # one blend file is plenty
 *blend1
 # assets that you can export from blender
-*.glb
 *.gltf
 *.bin
-*models/texture_06.png
+*texture_06.png
 
