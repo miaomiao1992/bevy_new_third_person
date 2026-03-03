@@ -57,7 +57,7 @@ impl FromWorld for Models {
         let assets = world.resource::<AssetServer>();
         Self {
             player: assets.load("models/player.glb"),
-            entry_scene: assets.load("models/scene.glb"),
+            entry_scene: assets.load("models/scene.gltf"),
         }
     }
 }
