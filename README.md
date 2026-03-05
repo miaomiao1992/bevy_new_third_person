@@ -128,10 +128,7 @@ See the [credits](assets/credits.json) for more information.
 
 ## License
 
-The source code in this repository is licensed under any of the following at your option:
-- [CC0-1.0 License](./LICENSE-CC0)
-- [MIT License](./LICENSE-MIT)
-- [Apache License, Version 2.0](./LICENSE-APACHE)
+[The code is under CC4 licence](https://creativecommons.org/licenses/by/4.0/)
 
 ## Bevy Compatibility
 
@@ -151,8 +148,8 @@ The source code in this repository is licensed under any of the following at you
 [bevy_seedling]: https://github.com/CorvusPrudens/bevy_seedling
 [bevy_third_person_camera]: https://github.com/The-DevBlog/bevy_third_person_camera
 [bevy_top_down_camera]: https://github.com/olekspickle/bevy_top_down_camera
-[bevy_ahoy]: https://github.com/jannhohenheim/bevy_ahoy
-[bevy_shuffle_bag]: https://github.com/jannhohenheim/bevy_shuffle_bag
+[bevy_ahoy]: https://github.com/janhohenheim/bevy_ahoy
+[bevy_shuffle_bag]: https://github.com/janhohenheim/bevy_shuffle_bag
 [Bevy Cheat Book]: https://bevy-cheatbook.github.io/introduction.html
 [BevyFlock]: https://github.com/TheBevyFlock/bevy_new_2d
 [bevy_enhanced_input]: https://github.com/projectharmonia/bevy_enhanced_input
