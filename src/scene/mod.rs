@@ -15,7 +15,8 @@
 //! ```
 //! more on that here: <https://bevyskein.dev/docs/migration-tools>
 //! Scene logic is only active during the State `Screen::Playing`
-use crate::*;
+use crate::{asset_loading::Particles, *};
+use bevy_sprinkles::prelude::*;
 
 mod screen_fade;
 mod skybox;
@@ -23,7 +24,8 @@ pub use screen_fade::*;
 pub use skybox::*;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((skybox::plugin, screen_fade::plugin))
+    app.add_plugins(SprinklesPlugin)
+        .add_plugins((skybox::plugin, screen_fade::plugin))
         .add_systems(OnEnter(Screen::Title), spawn_level);
 }
 
@@ -42,4 +44,23 @@ pub fn spawn_level(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut comm
         brightness: 500.0,
         ..Default::default()
     });
+}
+
+fn attach_particles(
+    on: On<Add, Mood>,
+    moods: Query<(&Mood, &Transform)>,
+    mut commands: Commands,
+    particles: Res<Particles>,
+    // gltf_assets: Res<Assets<Gltf>>,
+    // mut meshes: ResMut<Assets<Mesh>>,
+    // mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let Ok((mood, transform)) = moods.get(on.entity) else {
+        return;
+    };
+    if matches!(mood, Mood::Combat) {
+        commands.entity(on.entity).insert(ParticleSystem3D {
+            handle: particles.sun_floor.clone(),
+        });
+    }
 }
