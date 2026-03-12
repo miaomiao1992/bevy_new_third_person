@@ -1,6 +1,7 @@
 use crate::*;
 use bevy_ahoy::prelude::*;
 use bevy_fix_cursor_unlock_web::prelude::*;
+use bevy_sprinkles::SprinklesPlugin;
 #[cfg(feature = "third_person")]
 pub use bevy_third_person_camera::{
     ThirdPersonCamera, ThirdPersonCameraPlugin, ThirdPersonCameraTarget,
@@ -18,6 +19,7 @@ pub fn plugin(app: &mut App) {
         EnhancedInputPlugin,
         SkeinPlugin::default(),
         PhysicsPlugins::default(),
+        SprinklesPlugin,
         AhoyPlugins::default(),
     ));
 

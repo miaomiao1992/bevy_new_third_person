@@ -50,13 +50,13 @@ To set this up, follow the instructions in the [release announcement](https://be
 - [x] audio, video and keys rebind tabs in settings (currently broken)
 - [x] easy drop in scene integration using awesome [skein] with a simple scene
 - [x] custom font replace example using pre-loaded font
-- [x] simple animation setup with AnimationGraph & smooth AnimationTransitions
+- [x] simple blended animation setup with AnimationGraph & smooth AnimationTransitions
 
 ### TODOs
+- [ ] 3d and 2d particles demo: shooting magic balls, fireplace, step dust
 - [ ] sullscreen effect shader demo: getting hurt by height fall?
 https://github.com/bevyengine/bevy/blob/release-0.18.0/assets/shaders/fullscreen_effect.wgsl
 https://github.com/bevyengine/bevy/blob/release-0.18.0/examples/shader_advanced/fullscreen_material.rs
-- [ ] 3d and 2d particles demo: shooting magic balls, fireplace, step dust
 - [ ] spatial audio demo: boombox emitting background music
 - [ ] remove different camera features and introduce game modes that use them automatically:
         - default to first person,

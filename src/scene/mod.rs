@@ -16,6 +16,7 @@
 //! more on that here: <https://bevyskein.dev/docs/migration-tools>
 //! Scene logic is only active during the State `Screen::Playing`
 use crate::{asset_loading::Particles, *};
+use bevy::scene::SceneInstanceReady;
 use bevy_sprinkles::prelude::*;
 
 mod screen_fade;
@@ -24,19 +25,19 @@ pub use screen_fade::*;
 pub use skybox::*;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(SprinklesPlugin)
-        .add_plugins((skybox::plugin, screen_fade::plugin))
-        .add_systems(OnEnter(Screen::Title), spawn_level);
+    app.add_plugins((skybox::plugin, screen_fade::plugin));
 }
 
 pub fn spawn_level(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut commands: Commands) {
     let Some(scene) = gltf_assets.get(&models.entry_scene) else {
         return;
     };
-    commands.spawn((
-        SceneRoot(scene.scenes[0].clone()),
-        Transform::from_scale(Vec3::splat(1.0)),
-    ));
+    commands
+        .spawn((
+            SceneRoot(scene.scenes[0].clone()),
+            Transform::from_scale(Vec3::splat(1.0)),
+        ))
+        .observe(attach_particles);
 
     // to see something when suns go away
     commands.insert_resource(GlobalAmbientLight {
@@ -47,20 +48,24 @@ pub fn spawn_level(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut comm
 }
 
 fn attach_particles(
-    on: On<Add, Mood>,
-    moods: Query<(&Mood, &Transform)>,
-    mut commands: Commands,
+    _: On<SceneInstanceReady>,
+    moods: Query<(Entity, &Mood)>,
+    transforms: Query<&Transform>,
     particles: Res<Particles>,
-    // gltf_assets: Res<Assets<Gltf>>,
-    // mut meshes: ResMut<Assets<Mesh>>,
-    // mut materials: ResMut<Assets<StandardMaterial>>,
+    mut commands: Commands,
 ) {
-    let Ok((mood, transform)) = moods.get(on.entity) else {
-        return;
-    };
-    if matches!(mood, Mood::Combat) {
-        commands.entity(on.entity).insert(ParticleSystem3D {
-            handle: particles.sun_floor.clone(),
-        });
+    for (e, mood) in moods.iter() {
+        if let Ok(transform) = transforms.get(e) {
+            let mut pos = *transform;
+            pos.scale = Vec3::new(0.2, 2.0, 0.2);
+
+            let handle = match mood {
+                Mood::Exploration => particles.healing_zone.clone(),
+                Mood::Combat => particles.sun_floor.clone(),
+            };
+            commands.entity(e).with_children(|parent| {
+                parent.spawn((pos, ParticleSystem3D { handle }));
+            });
+        }
     }
 }

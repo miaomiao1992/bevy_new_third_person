@@ -2,6 +2,7 @@ use crate::*;
 use bevy::asset::Asset;
 use bevy_seedling::sample::AudioSample;
 use bevy_shuffle_bag::ShuffleBag;
+use bevy_sprinkles::prelude::ParticleSystemAsset;
 
 mod ron;
 mod tracking;
@@ -15,6 +16,7 @@ pub fn plugin(app: &mut App) {
         .load_resource_from_path::<Config>("config.ron")
         .load_resource_from_path::<CreditsPreset>("credits.ron")
         .load_resource::<AudioSources>()
+        .load_resource::<Particles>()
         .load_resource::<Textures>()
         .load_resource::<Models>();
     // .load_resource::<ShaderAssets>()
@@ -115,6 +117,25 @@ impl FromWorld for AudioSources {
             explore: ShuffleBag::try_new(explore, &mut rng).unwrap(),
             hover: a.load(Self::BTN_HOVER),
             press: a.load(Self::BTN_PRESS),
+        }
+    }
+}
+
+#[derive(Resource, Asset, Clone, TypePath)]
+pub(crate) struct Particles {
+    #[dependency]
+    pub sun_floor: Handle<ParticleSystemAsset>,
+    #[dependency]
+    pub healing_zone: Handle<ParticleSystemAsset>,
+}
+
+impl FromWorld for Particles {
+    fn from_world(world: &mut World) -> Self {
+        let assets = world.resource::<AssetServer>();
+
+        Self {
+            sun_floor: assets.load("particles/sun-floor.ron"),
+            healing_zone: assets.load("particles/healing-zone.ron"),
         }
     }
 }
