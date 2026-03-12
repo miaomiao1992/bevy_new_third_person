@@ -107,9 +107,14 @@ pub fn calcucate_animations(
         let h_speed = Vec3::new(velocity.x, 0.0, velocity.z).length().abs();
         let v_speed = velocity.y;
         prev_pos.0 = pos.translation;
-        // debug!("v_speed: {v_speed}, h_speed: {h_speed}");
 
+        let moving = h_speed > idle_to_run_ani;
         let grounded = ahoy_state.grounded.is_some();
+
+        // debug!(
+        //     "grounded:{grounded}, v_speed: {v_speed}, h_speed: {h_speed}, elapsed: {:?}",
+        //     ahoy_state.last_ground.elapsed().as_secs_f32()
+        // );
 
         // MANTLE
         if ahoy_state.mantle.is_some() {
@@ -120,10 +125,6 @@ pub fn calcucate_animations(
         // in the air animation
         if !grounded {
             if !animation.current.is_jumping() {
-                debug!(
-                    "jumping,v_speed: {v_speed}, h_speed: {h_speed}, elapsed: {:?}",
-                    ahoy_state.last_ground.elapsed().as_secs_f32()
-                );
                 if v_speed > 0.1 {
                     animation.request(AnimationState::Jump);
                 } else {
@@ -133,11 +134,11 @@ pub fn calcucate_animations(
             continue;
         }
 
-        // at this point we are grounded
+        // at this point we are GROUNDED
         if grounded && animation.current.is_jumping() {
-            if h_speed > idle_to_run_ani {
-                // Landed while running? Skip the thud, go to Run
-                animation.request(AnimationState::Run(h_speed));
+            if moving {
+                // landed while running? skip the thud, go straight to Run
+                animation.request(AnimationState::Run(ahoy.speed));
             } else {
                 animation.request(AnimationState::Land);
             }
@@ -145,9 +146,9 @@ pub fn calcucate_animations(
         }
 
         // CROUCH
-        if ahoy_state.crouching {
-            if h_speed > idle_to_run_ani {
-                animation.request(AnimationState::Crouch(h_speed));
+        if ahoy_state.crouching && animation.current.can_crouch() {
+            if moving {
+                animation.request(AnimationState::Crouch(ahoy.speed));
             } else {
                 animation.request(AnimationState::CrouchIdle);
             }
@@ -157,13 +158,13 @@ pub fn calcucate_animations(
         // SPRINT
         let is_sprinting = ahoy.speed > cfg.player.movement.speed();
         if is_sprinting {
-            animation.request(AnimationState::Sprint(h_speed));
+            animation.request(AnimationState::Sprint(ahoy.speed));
             continue;
         }
 
         // and finally RUN\IDLE
-        if h_speed > idle_to_run_ani {
-            animation.request(AnimationState::Run(h_speed));
+        if moving {
+            animation.request(AnimationState::Run(ahoy.speed));
         } else {
             animation.request(AnimationState::StandIdle);
         }
@@ -202,9 +203,10 @@ pub fn animate(
                 )
                 .repeat();
 
-            let current_node = ani.nodes[ani.current.clip_index()];
-            if let Some(active) = animation_player.animation_mut(current_node) {
-                match ani.current {
+            // Set speed on the NEW animation, not the old one
+            let next_node = ani.nodes[next.clip_index()];
+            if let Some(active) = animation_player.animation_mut(next_node) {
+                match next {
                     AnimationState::Run(s)
                     | AnimationState::Sprint(s)
                     | AnimationState::Crouch(s) => active.set_speed(s * knobs::DAMPING),
@@ -355,13 +357,22 @@ impl AnimationState {
             AnimationState::Jump | AnimationState::Land | AnimationState::Dash
         )
     }
-    pub fn is_jumping(&self) -> bool {
-        matches!(self, AnimationState::Jump | AnimationState::JumpLoop)
+    pub fn can_crouch(&self) -> bool {
+        !matches!(
+            self,
+            AnimationState::Jump
+                | AnimationState::JumpLoop
+                | AnimationState::Land
+                | AnimationState::Dash
+        )
     }
     pub fn is_running(&self) -> bool {
         matches!(self, AnimationState::Run(_))
     }
     pub fn is_falling(&self) -> bool {
         matches!(self, AnimationState::JumpLoop)
+    }
+    pub fn is_jumping(&self) -> bool {
+        matches!(self, AnimationState::Jump | AnimationState::JumpLoop)
     }
 }

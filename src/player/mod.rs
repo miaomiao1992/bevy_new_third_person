@@ -32,8 +32,8 @@ pub fn spawn_player(
     #[cfg(feature = "fpv")] camera: Single<Entity, With<SceneCamera>>,
     mut commands: Commands,
     // DEBUG
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    // mut meshes: ResMut<Assets<Mesh>>,
+    // mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let Some(gltf) = gltf_assets.get(&models.player) else {
         return;
@@ -70,15 +70,15 @@ pub fn spawn_player(
             e.observe(prepare_animations);
 
             // DEBUG
-            let collider_mesh = Mesh::from(hitbox);
-            let debug_collider_mesh = Mesh3d(meshes.add(collider_mesh.clone()));
-            let debug_collider_color =
-                MeshMaterial3d(materials.add(Color::srgba(0.9, 0.1, 0.9, 0.1)));
-            parent.spawn((
-                debug_collider_mesh,
-                debug_collider_color,
-                Transform::from_xyz(0.0, -0.1, 0.0),
-            ));
+            // let collider_mesh = Mesh::from(hitbox);
+            // let debug_collider_mesh = Mesh3d(meshes.add(collider_mesh.clone()));
+            // let debug_collider_color =
+            //     MeshMaterial3d(materials.add(Color::srgba(0.9, 0.1, 0.9, 0.1)));
+            // parent.spawn((
+            //     debug_collider_mesh,
+            //     debug_collider_color,
+            //     Transform::from_xyz(0.0, -0.1, 0.0),
+            // ));
             // DEBUG
         })
         .id();
