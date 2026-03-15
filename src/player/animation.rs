@@ -45,7 +45,6 @@ pub fn prepare_animations(
     let Ok(mut animation_player) = animation_players.get_mut(animation_player_e) else {
         return;
     };
-
     let Some(gltf) = gltfs.get(&models.player) else {
         return;
     };
@@ -195,13 +194,15 @@ pub fn animate(
                 knobs::TRANSITION
             };
 
-            transitions
-                .play(
-                    &mut animation_player,
-                    node,
-                    Duration::from_secs_f32(duration),
-                )
-                .repeat();
+            transitions.play(
+                &mut animation_player,
+                node,
+                Duration::from_secs_f32(duration),
+            );
+
+            if !next.is_locked() {
+                animation_player.animation_mut(node).map(|a| a.repeat());
+            }
 
             // Set speed on the NEW animation, not the old one
             let next_node = ani.nodes[next.clip_index()];
@@ -214,7 +215,7 @@ pub fn animate(
                 };
             }
 
-            debug!("current: {:?}, next: {next:?}", ani.current);
+            // debug!("current: {:?}, next: {next:?}", ani.current);
             ani.current = next;
         }
 
@@ -222,7 +223,7 @@ pub fn animate(
             let node = ani.nodes[ani.current.clip_index()];
 
             if let Some(active) = animation_player.animation(node)
-                && active.elapsed() >= active.seek_time() * 0.85
+                && active.is_finished()
             {
                 let chained = match ani.current {
                     AnimationState::Jump => Some(AnimationState::JumpLoop),
@@ -231,7 +232,7 @@ pub fn animate(
                 };
 
                 if let Some(next) = chained {
-                    debug!("chained: {next:?}");
+                    // debug!("chained animation: {next:?}");
                     ani.requested = Some(next);
                 }
             }
@@ -267,7 +268,14 @@ impl Default for Animations {
 /// State change helpers
 impl Animations {
     fn request(&mut self, state: AnimationState) {
-        if self.current.is_locked() {
+        let is_moving = self.current.is_moving();
+        let is_jumping_to_land = self.current.is_jumping() && matches!(state, AnimationState::Land);
+        let requested_is_movement = matches!(
+            state,
+            AnimationState::Run(_) | AnimationState::Sprint(_) | AnimationState::Crouch(_)
+        );
+
+        if self.current.is_locked() && !is_jumping_to_land && !is_moving && !requested_is_movement {
             return;
         }
 
@@ -311,13 +319,6 @@ impl Animations {
     }
     pub fn end_jump(&mut self) {
         self.request(AnimationState::Land);
-    }
-
-    pub fn is_jumping(&self) -> bool {
-        self.current.is_jumping()
-    }
-    pub fn is_falling(&self) -> bool {
-        self.current.is_falling()
     }
 }
 
@@ -374,5 +375,14 @@ impl AnimationState {
     }
     pub fn is_jumping(&self) -> bool {
         matches!(self, AnimationState::Jump | AnimationState::JumpLoop)
+    }
+    pub fn is_landing(&self) -> bool {
+        matches!(self, AnimationState::Land)
+    }
+    pub fn is_moving(&self) -> bool {
+        matches!(
+            self,
+            AnimationState::Run(_) | AnimationState::Sprint(_) | AnimationState::Crouch(_)
+        )
     }
 }
