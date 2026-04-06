@@ -1,7 +1,7 @@
 //! Helper module that enables using gamepad to simulate mouse and keyboard input.
 use super::*;
 use bevy::{
-    input::{InputSystems, gamepad::gamepad_event_processing_system, keyboard::Key},
+    input::{gamepad::gamepad_event_processing_system, keyboard::Key, InputSystems},
     window::{PrimaryWindow, WindowEvent},
 };
 use std::collections::HashMap;

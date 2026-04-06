@@ -8,7 +8,6 @@ use bevy_perf_ui::{
 pub fn plugin(app: &mut App) {
     app.add_plugins((
         PerfUiPlugin,
-        bevy::render::diagnostic::RenderDiagnosticsPlugin,
         #[cfg(feature = "dev_native")]
         (
             bevy::diagnostic::FrameTimeDiagnosticsPlugin::default(),

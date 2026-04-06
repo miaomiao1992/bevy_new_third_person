@@ -26,6 +26,10 @@ impl PlayerInput {
                 ),
                 (
                     Action::<Crouch>::new(),
+                    ActionSettings {
+                        require_reset: true,
+                        ..Default::default()
+                    },
                     bindings![KeyCode::ControlLeft, GamepadButton::East],
                 ),
                 (

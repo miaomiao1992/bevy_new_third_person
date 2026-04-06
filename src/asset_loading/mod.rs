@@ -140,23 +140,27 @@ impl FromWorld for Particles {
     }
 }
 
-// /// A [`Resource`] that contains all the assets needed to spawn the level.
-// /// We use this to preload assets before the level is spawned.
-// #[derive(Resource, Asset, Clone, TypePath)]
-// pub(crate) struct ShaderAssets {
-//     #[dependency]
-//     alpha_pattern: Handle<Shader>,
-// }
-//
-// impl FromWorld for ShaderAssets {
-//     fn from_world(world: &mut World) -> Self {
-//         let assets = world.resource::<AssetServer>();
-//
-//         Self {
-//             alpha_pattern: assets.load("shaders/alpha_pattern.wgsl"),
-//         }
-//     }
-// }
+/// A [`Resource`] that contains all the assets needed to spawn the level.
+/// We use this to preload assets before the level is spawned.
+#[allow(dead_code)]
+#[derive(Resource, Asset, Clone, TypePath)]
+pub(crate) struct ShaderAssets {
+    #[dependency]
+    alpha_pattern: Handle<Shader>,
+    #[dependency]
+    cosmic_sphere: Handle<Shader>,
+}
+
+impl FromWorld for ShaderAssets {
+    fn from_world(world: &mut World) -> Self {
+        let assets = world.resource::<AssetServer>();
+
+        Self {
+            alpha_pattern: assets.load("shaders/alpha_pattern.wgsl"),
+            cosmic_sphere: assets.load("shaders/cosmic_sphere.wgsl"),
+        }
+    }
+}
 
 // #[derive(Asset, Clone, Reflect, Resource)]
 // #[reflect(Resource)]

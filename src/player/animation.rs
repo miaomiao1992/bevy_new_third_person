@@ -109,10 +109,8 @@ pub fn calcucate_animations(
 
         let moving = h_speed > idle_to_run_ani;
         let grounded = ahoy_state.grounded.is_some();
-
-        // debug!(
-        //     "grounded:{grounded}, v_speed: {v_speed}, h_speed: {h_speed}, elapsed: {:?}",
-        //     ahoy_state.last_ground.elapsed().as_secs_f32()
+        // tracing::debug!(
+        //     "player speed: {h_speed}, idle to run threshold: {idle_to_run_ani}, grounded: {grounded}"
         // );
 
         // MANTLE
@@ -121,8 +119,14 @@ pub fn calcucate_animations(
             continue;
         }
 
+        // Handle stationary players: if speed is near zero and we're not moving up,
+        // treat as grounded to avoid false jump animations when physics incorrectly reports ungrounded
+        let treat_as_grounded =
+            !grounded && h_speed < 0.1 && v_speed <= 0.1 && !animation.current.is_jumping();
+        let effectively_grounded = grounded || treat_as_grounded;
+
         // in the air animation
-        if !grounded {
+        if !effectively_grounded {
             if !animation.current.is_jumping() {
                 if v_speed > 0.1 {
                     animation.request(AnimationState::Jump);
@@ -134,9 +138,9 @@ pub fn calcucate_animations(
         }
 
         // at this point we are GROUNDED
-        if grounded && animation.current.is_jumping() {
+        // Only transition from jump to land/run - ignore if crouching
+        if effectively_grounded && animation.current.is_jumping() && !ahoy_state.crouching {
             if moving {
-                // landed while running? skip the thud, go straight to Run
                 animation.request(AnimationState::Run(ahoy.speed));
             } else {
                 animation.request(AnimationState::Land);
@@ -144,7 +148,13 @@ pub fn calcucate_animations(
             continue;
         }
 
-        // CROUCH
+        // Also handle releasing crouch: if in crouch animation but not holding button, go to StandIdle
+        if animation.current.is_crouching() && !ahoy_state.crouching {
+            animation.request(AnimationState::StandIdle);
+            continue;
+        }
+
+        // CROUCH - only request crouch if holding crouch button
         if ahoy_state.crouching && animation.current.can_crouch() {
             if moving {
                 animation.request(AnimationState::Crouch(ahoy.speed));
@@ -194,6 +204,8 @@ pub fn animate(
                 knobs::TRANSITION
             };
 
+            // debug!("animate: playing {:?} duration:{}", next, duration);
+
             transitions.play(
                 &mut animation_player,
                 node,
@@ -211,11 +223,11 @@ pub fn animate(
                     AnimationState::Run(s)
                     | AnimationState::Sprint(s)
                     | AnimationState::Crouch(s) => active.set_speed(s * knobs::DAMPING),
+                    AnimationState::Land => active.set_speed(2.5),
                     _ => active.set_speed(1.0),
                 };
             }
 
-            // debug!("current: {:?}, next: {next:?}", ani.current);
             ani.current = next;
         }
 
@@ -274,15 +286,22 @@ impl Animations {
             state,
             AnimationState::Run(_) | AnimationState::Sprint(_) | AnimationState::Crouch(_)
         );
+        let same_clip = self.current.clip_index() == state.clip_index();
+        let is_locked = self.current.is_locked();
 
-        if self.current.is_locked() && !is_jumping_to_land && !is_moving && !requested_is_movement {
+        debug!(
+            "request: curr={:?} next={:?} same_clip={}",
+            self.current, state, same_clip
+        );
+
+        if is_locked && !is_jumping_to_land && !is_moving && !requested_is_movement {
             return;
         }
 
-        if self.current.clip_index() != state.clip_index() {
-            self.requested = Some(state);
-        } else {
+        if same_clip {
             self.current = state;
+        } else {
+            self.requested = Some(state);
         }
     }
 
@@ -375,6 +394,9 @@ impl AnimationState {
     }
     pub fn is_jumping(&self) -> bool {
         matches!(self, AnimationState::Jump | AnimationState::JumpLoop)
+    }
+    pub fn is_crouching(&self) -> bool {
+        matches!(self, AnimationState::Crouch(_) | AnimationState::CrouchIdle)
     }
     pub fn is_landing(&self) -> bool {
         matches!(self, AnimationState::Land)
