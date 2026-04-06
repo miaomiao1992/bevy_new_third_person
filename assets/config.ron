@@ -18,7 +18,7 @@
             sprint_factor: 1.5,
             crouch_factor: 0.2,
             dash_distance: 10,
-            idle_to_run_threshold: 0.01,
+            idle_to_run_threshold: 0.001,
         ),
         hitbox:(
             radius: 0.5,

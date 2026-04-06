@@ -44,8 +44,8 @@ bevy_skein = "0.5"                                                      # blende
 bevy_third_person_camera = { version = "0.4", optional = true }         # 3rd person camera
 bevy_top_down_camera = { version = "0.3", optional = true }             # top down camera
 
-avian3d = { version = "0.6.0-rc.1", default-features = false, features = ["parry-f32", "3d", "f32"] }
 bevy_sprinkles = "0.2.0"                                                # 3d particles
+avian3d = { version = "0.6.0-rc.1", default-features = false, features = ["parry-f32", "3d", "f32"] }
 bevy_ahoy =   { version = "0.1.0-rc.6", default-features = false }      # character controller
 bevy_enhanced_input = { version = "0.24", features = ["serialize"] }    # keyboard/gamepad input
 
@@ -59,7 +59,6 @@ bevy_yarnspinner = "0.7"
 # to play with
 # bevy_open_vat
 # bevy_wind_waker_shader
-
 
 # misc
 easy-ext = "1"
@@ -86,6 +85,7 @@ third_person = ["bevy_third_person_camera"]
 native = [ "enhanced" ]
 web = [ "bevy/webgpu", "bevy_seedling/web_audio", "third_person" ]
 dev = [
+    "bevy/debug",
     "bevy_perf_ui",
     "bevy/bevy_dev_tools",
     "bevy-inspector-egui",

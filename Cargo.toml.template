@@ -12,6 +12,12 @@ keywords = ["bevy", "game", "third person", "topdown", "gamedev"]
 version = "0.18"
 default-features = false
 features = [
+    # TODO: change to this on 0.19 (thx Jan!)
+    # "3d",
+    # "jpeg",
+    # "serialize",
+    # "hotpatching",
+    # "reflect_auto_register",
     # opinionated list without bevy_audio
     "default_app",
     "default_platform",
@@ -37,25 +43,22 @@ bevy_skein = "0.5"                                                      # blende
 bevy_third_person_camera = { version = "0.4", optional = true }         # 3rd person camera
 bevy_top_down_camera = { version = "0.3", optional = true }             # top down camera
 
-avian3d = "0.6.0-rc.1"
-bevy_ahoy =  "0.1.0-rc.1"                                               # character controller
-bevy_enhanced_input = { version = "0.23", features = ["serialize"] }    # keyboard/gamepad input
-
-# dialogue
-bevy_yarnspinner = "0.7"
-bevy_yarnspinner_example_dialogue_view = "0.7"
-
-# to play with
-# bevy_open_vat
-# bevy_wind_waker_shader
-# bevy_hanabi = { version = "0.18", default-features = false, features = [
-#     "3d",
-#     "gpu_tests",
-# ] }
+avian3d = { version = "0.6.0-rc.1", default-features = false, features = ["parry-f32", "3d", "f32"] }
+bevy_sprinkles = "0.2.0"                                                # 3d particles
+bevy_ahoy =   { version = "0.1.0-rc.6", default-features = false }      # character controller
+bevy_enhanced_input = { version = "0.24", features = ["serialize"] }    # keyboard/gamepad input
 
 bevy_shuffle_bag = "0.4"                                                # deterministically random container
 bevy_seedling = { version = "0.7", features = ["hrtf"] }                # audio plugin using firewheel
 firewheel = "0.10"
+
+# dialogue
+bevy_yarnspinner = "0.7"
+
+# to play with
+# bevy_open_vat
+# bevy_wind_waker_shader
+
 
 # misc
 easy-ext = "1"
@@ -122,6 +125,6 @@ nonstandard_macro_braces = "warn"   # Make sure macros use their standard braces
 
 [patch.crates-io]
 bevy_ahoy = { git = "https://github.com/janhohenheim/bevy_ahoy" }
-bevy_third_person_camera = { git = "https://github.com/olekspickle/bevy_third_person_camera" }
 bevy_perf_ui = { git = "https://github.com/olekspickle/perf_ui" }
+bevy_sprinkles = { git = "https://github.com/olekspickle/sprinkles" }
 
