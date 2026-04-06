@@ -19,13 +19,15 @@ use crate::{asset_loading::Particles, *};
 use bevy::scene::SceneInstanceReady;
 use bevy_sprinkles::prelude::*;
 
+mod cosmic_sphere;
 mod screen_fade;
 mod skybox;
+pub use cosmic_sphere::*;
 pub use screen_fade::*;
 pub use skybox::*;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((skybox::plugin, screen_fade::plugin));
+    app.add_plugins((skybox::plugin, screen_fade::plugin, cosmic_sphere::plugin));
 }
 
 pub fn spawn_level(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut commands: Commands) {
@@ -37,7 +39,8 @@ pub fn spawn_level(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut comm
             SceneRoot(scene.scenes[0].clone()),
             Transform::from_scale(Vec3::splat(1.0)),
         ))
-        .observe(attach_particles);
+        .observe(attach_particles)
+        .observe(setup_cosmic_sphere);
 
     // to see something when suns go away
     commands.insert_resource(GlobalAmbientLight {
