@@ -6,6 +6,7 @@ use bevy_enhanced_input::prelude::*;
 mod animation;
 mod control;
 mod input;
+mod particles;
 mod sound;
 
 pub use animation::*;
@@ -20,6 +21,7 @@ pub fn plugin(app: &mut App) {
         sound::plugin,
         animation::plugin,
         input::plugin,
+        particles::plugin,
     ))
     .add_systems(OnEnter(Screen::Gameplay), spawn_player)
     .add_observer(player_post_spawn);

@@ -40,6 +40,7 @@ bevy_fix_cursor_unlock_web = "0.3"
 bevy_perf_ui = { version = "0.6", optional = true }                     # performance UI
 bevy-inspector-egui = { version = "0.36", optional = true }             # entity inspector
 bevy_skein = "0.5"                                                      # blender integration
+bevy_rand = "0.14.2"
 
 bevy_third_person_camera = { version = "0.4", optional = true }         # 3rd person camera
 bevy_top_down_camera = { version = "0.3", optional = true }             # top down camera

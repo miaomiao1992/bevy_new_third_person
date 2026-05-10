@@ -89,16 +89,18 @@ pub fn calcucate_animations(
     time: Res<Time>,
     cfg: Res<Config>,
     mut players: Query<(
+        Entity,
         &CharacterController,
         &CharacterControllerState,
         &Transform,
         &mut PreviousPosition,
         &mut Player,
     )>,
+    mut commands: Commands,
 ) {
     let idle_to_run_ani = cfg.player.movement.idle_to_run_threshold * 1000.0;
 
-    for (ahoy, ahoy_state, pos, mut prev_pos, mut player) in players.iter_mut() {
+    for (entity, ahoy, ahoy_state, pos, mut prev_pos, mut player) in players.iter_mut() {
         let animation = &mut player.animation;
 
         let displacement = pos.translation - prev_pos.0;
@@ -140,6 +142,7 @@ pub fn calcucate_animations(
         // at this point we are GROUNDED
         // Only transition from jump to land/run - ignore if crouching
         if effectively_grounded && animation.current.is_jumping() && !ahoy_state.crouching {
+            commands.entity(entity).trigger(PlayerLanded);
             if moving {
                 animation.request(AnimationState::Run(ahoy.speed));
             } else {
@@ -196,7 +199,7 @@ pub fn animate(
         };
 
         if let Some(next) = ani.requested.take() {
-            let node = ani.nodes[next.clip_index()];
+            let node = ani.nodes[next.idx()];
 
             let duration = if next.is_jumping() {
                 knobs::JUMP_TRANSITION
@@ -217,7 +220,7 @@ pub fn animate(
             }
 
             // Set speed on the NEW animation, not the old one
-            let next_node = ani.nodes[next.clip_index()];
+            let next_node = ani.nodes[next.idx()];
             if let Some(active) = animation_player.animation_mut(next_node) {
                 match next {
                     AnimationState::Run(s)
@@ -232,7 +235,7 @@ pub fn animate(
         }
 
         if ani.current.is_locked() {
-            let node = ani.nodes[ani.current.clip_index()];
+            let node = ani.nodes[ani.current.idx()];
 
             if let Some(active) = animation_player.animation(node)
                 && active.is_finished()
@@ -286,13 +289,13 @@ impl Animations {
             state,
             AnimationState::Run(_) | AnimationState::Sprint(_) | AnimationState::Crouch(_)
         );
-        let same_clip = self.current.clip_index() == state.clip_index();
+        let same_clip = self.current.idx() == state.idx();
         let is_locked = self.current.is_locked();
 
-        debug!(
-            "request: curr={:?} next={:?} same_clip={}",
-            self.current, state, same_clip
-        );
+        // debug!(
+        //     "request: curr={:?} next={:?} same_clip={}",
+        //     self.current, state, same_clip
+        // );
 
         if is_locked && !is_jumping_to_land && !is_moving && !requested_is_movement {
             return;
@@ -357,7 +360,7 @@ pub enum AnimationState {
     Dash,
 }
 impl AnimationState {
-    pub fn clip_index(&self) -> usize {
+    pub fn idx(&self) -> usize {
         match self {
             AnimationState::StandIdle => 0,
             AnimationState::Run(_) => 1,
@@ -370,6 +373,7 @@ impl AnimationState {
             AnimationState::Dash => 8,
         }
     }
+
     /// Animations that should not be interrupted by other animations
     pub fn is_locked(&self) -> bool {
         matches!(

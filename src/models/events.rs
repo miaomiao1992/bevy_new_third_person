@@ -10,6 +10,8 @@ pub struct ToggleCamCursor(pub Entity);
 pub struct TogglePause(pub Entity);
 #[derive(EntityEvent)]
 pub struct ToggleMute(pub Entity);
+#[derive(EntityEvent)]
+pub struct PlayerLanded(pub Entity);
 #[derive(Event)]
 pub struct ToggleDebugUi;
 #[derive(Event)]

@@ -122,11 +122,13 @@ impl FromWorld for AudioSources {
 }
 
 #[derive(Resource, Asset, Clone, TypePath)]
-pub(crate) struct Particles {
+pub struct Particles {
     #[dependency]
     pub sun_floor: Handle<ParticleSystemAsset>,
     #[dependency]
     pub healing_zone: Handle<ParticleSystemAsset>,
+    #[dependency]
+    pub wind_spin: Handle<ParticleSystemAsset>,
 }
 
 impl FromWorld for Particles {
@@ -136,6 +138,7 @@ impl FromWorld for Particles {
         Self {
             sun_floor: assets.load("particles/sun-floor.ron"),
             healing_zone: assets.load("particles/healing-zone.ron"),
+            wind_spin: assets.load("particles/wind-spin.ron"),
         }
     }
 }

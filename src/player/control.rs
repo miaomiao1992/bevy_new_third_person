@@ -19,23 +19,25 @@ pub fn plugin(app: &mut App) {
 
 fn movement(
     cfg: Res<Config>,
-    movement: Single<&Action<Movement>>,
+    movement: Query<&Action<Movement>>,
     camera: Single<&Transform, With<SceneCamera>>,
     mut player_q: Query<(&mut Transform, &mut CharacterLook), Without<SceneCamera>>,
 ) {
-    let movement = *movement.into_inner();
+    for movement in movement.iter() {
+        let movement = *movement;
 
-    for (mut pos, mut look) in player_q.iter_mut() {
-        let input_dir = camera.movement_direction(*movement);
+        for (mut pos, mut look) in player_q.iter_mut() {
+            let input_dir = camera.movement_direction(*movement);
 
-        if input_dir.length_squared() > cfg.player.movement.idle_to_run_threshold {
-            // set ahoy KCC direction
-            let (yaw, pitch, _) = camera.rotation.to_euler(EulerRot::YXZ);
-            *look = CharacterLook { yaw, pitch };
+            if input_dir.length_squared() > cfg.player.movement.idle_to_run_threshold {
+                // set ahoy KCC direction
+                let (yaw, pitch, _) = camera.rotation.to_euler(EulerRot::YXZ);
+                *look = CharacterLook { yaw, pitch };
 
-            // rotate model
-            let rotation = Quat::from_rotation_y(input_dir.x.atan2(input_dir.z));
-            pos.rotation = pos.rotation.slerp(rotation, 0.2);
+                // rotate model
+                let rotation = Quat::from_rotation_y(input_dir.x.atan2(input_dir.z));
+                pos.rotation = pos.rotation.slerp(rotation, 0.2);
+            }
         }
     }
 }
